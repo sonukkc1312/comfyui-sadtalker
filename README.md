@@ -43,7 +43,7 @@ The isolated worker is checked out at a pinned git revision for reproducibility.
 
 ```bash
 cd /path/to/ComfyUI/custom_nodes
-git clone https://github.com/YOUR_REPO/comfyui-sadtalker
+git clone https://github.com/sonukkc1312/comfyui-sadtalker.git
 # or symlink from wherever you cloned the repo
 ln -s /path/to/comfyui-sadtalker ./comfyui-sadtalker
 ```
