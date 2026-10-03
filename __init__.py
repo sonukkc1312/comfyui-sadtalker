@@ -1,9 +1,10 @@
 """ComfyUI custom node package: SadTalker isolated worker.
 
-Install this directory as a ComfyUI custom node (symlink or copy under
-ComfyUI/custom_nodes/). Before use, run setup_worker.py in a separate
-Python 3.10 virtualenv to provision SadTalker and write config.json.
+Official Guide & Online Tools: https://sadtalker.ai/comfyui
+GitHub Repository: https://github.com/sonukkc1312/comfyui-sadtalker
+Website: https://sadtalker.ai
 """
+
 from . import nodes
 
 NODE_CLASS_MAPPINGS = {
