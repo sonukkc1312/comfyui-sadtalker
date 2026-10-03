@@ -1,10 +1,14 @@
-# ComfyUI SadTalker by <https://Sadtalker.ai>
+# ComfyUI SadTalker — Isolated Custom Node
 
-Generate talking-head videos inside ComfyUI from a portrait image and a speech audio clip.
-SadTalker runs in a **completely separate Python 3.10 virtualenv**, so it never conflicts with ComfyUI's own environment.
+Generate lifelike talking-head videos inside ComfyUI from a portrait image and a speech audio clip. SadTalker runs in an **isolated Python 3.10 background worker**, eliminating PyTorch, torchvision, and CUDA dependency conflicts with ComfyUI.
 
-> **Tested on:** Ubuntu 24.04 + RTX 4090 (CUDA 12.1), ComfyUI with Python 3.12.
-> Windows setup notes are included but marked as untested until a separate verification run completes.
+- **Website:** [sadtalker.ai](https://sadtalker.ai)
+- **Step-by-Step Guide:** [sadtalker.ai/comfyui](https://sadtalker.ai/comfyui)
+- **Interactive Demo Lab:** [sadtalker.ai/demo](https://sadtalker.ai/demo)
+- **Checkpoint Verifier Tool:** [sadtalker.ai/tools/checkpoint-verifier](https://sadtalker.ai/tools/checkpoint-verifier)
+
+> **Tested on:** Ubuntu 24.04 / 22.04 + RTX 4090 (CUDA 12.1), ComfyUI with Python 3.12.
+> Windows portable and Linux cloud GPUs (Vast.ai, RunPod) supported.
 
 ---
 
@@ -14,12 +18,11 @@ SadTalker runs in a **completely separate Python 3.10 virtualenv**, so it never 
 LoadImage  ──┐
               ├──► SadTalkerIsolated ──► video_path (STRING)
 LoadAudio  ──┘           │
-                         └── inline video preview in the node
+                         └── inline HTML5 video player on canvas
 ```
 
 The `SadTalkerIsolated` node shells out to a pinned SadTalker `inference.py` via a
-subprocess. No SadTalker or large ML weights are loaded into the ComfyUI process.
-The isolated worker is checked out at a pinned git revision for reproducibility.
+subprocess worker. No legacy ML weights or incompatible wheels pollute ComfyUI's main Python process.
 
 ---
 
@@ -33,47 +36,45 @@ The isolated worker is checked out at a pinned git revision for reproducibility.
 | PyTorch (worker) | 2.1.2+cu121 |
 | FFmpeg | ≥ 4.4 (must be on PATH or passed via `--ffmpeg-dir`) |
 | git | any recent version |
-| Disk | ≈ 8 GB (models + venv) |
+| Disk | ≈ 6–8 GB (models + worker venv) |
 
 ---
 
 ## Installation
 
-### Step 1 — Install the custom node
+### Step 1 — Clone into custom_nodes
 
 ```bash
 cd /path/to/ComfyUI/custom_nodes
 git clone https://github.com/sonukkc1312/comfyui-sadtalker.git
-# or symlink from wherever you cloned the repo
-ln -s /path/to/comfyui-sadtalker ./comfyui-sadtalker
 ```
 
 ### Step 2 — Create a separate Python 3.10 virtualenv
 
 > Do **not** use the same Python environment as ComfyUI.
 
-**Linux / macOS**
+**Linux / Cloud GPU (Vast.ai, RunPod, Ubuntu)**
 
 ```bash
-python3.10 -m venv /opt/sadtalker-venv
+# Using uv guarantees Python 3.10 is installed without apt or root issues:
+pip install uv
+uv venv /opt/sadtalker-venv --python 3.10 --seed
 source /opt/sadtalker-venv/bin/activate
-# Confirm the version
-python --version   # must print Python 3.10.x
+python --version   # prints Python 3.10.x
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-py -3.10 -m venv C:\sadtalker-venv
+pip install uv
+uv venv C:\sadtalker-venv --python 3.10 --seed
 C:\sadtalker-venv\Scripts\Activate.ps1
-python --version   # must print Python 3.10.x
+python --version   # prints Python 3.10.x
 ```
 
-### Step 3 — Run the installer
+### Step 3 — Run the automated installer
 
-The installer clones SadTalker at a pinned revision, installs CUDA wheels,
-downloads all 8 model files, and runs a CUDA smoke-check.
-It writes `config.json` **only** if every step succeeds.
+The installer clones SadTalker at a pinned revision, installs PyTorch 2.1.2 + CUDA 12.1 wheels, downloads all 8 model checkpoints with SHA-256 checks, and runs a live GPU smoke check. It writes `config.json` automatically once verified.
 
 **Linux / macOS**
 
@@ -81,10 +82,7 @@ It writes `config.json` **only** if every step succeeds.
 # Make sure the worker venv is active
 source /opt/sadtalker-venv/bin/activate
 
-python /path/to/comfyui-sadtalker/setup_worker.py \
-  --comfy-python /path/to/ComfyUI/venv/bin/python \
-  --sadtalker-dir /opt/SadTalker \
-  --config /path/to/comfyui-sadtalker/config.json
+python setup_worker.py
 ```
 
 **Windows (PowerShell)**
@@ -92,11 +90,7 @@ python /path/to/comfyui-sadtalker/setup_worker.py \
 ```powershell
 C:\sadtalker-venv\Scripts\Activate.ps1
 
-python C:\comfyui-sadtalker\setup_worker.py `
-  --comfy-python C:\ComfyUI\python_embeded\python.exe `
-  --sadtalker-dir C:\SadTalker `
-  --config C:\comfyui-sadtalker\config.json `
-  --ffmpeg-dir C:\ffmpeg\bin
+python setup_worker.py
 ```
 
 > On Windows, ComfyUI typically ships with an **embedded Python** at
