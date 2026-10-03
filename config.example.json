@@ -1,0 +1,6 @@
+{
+  "python": "/path/to/sadtalker-venv/bin/python",
+  "sadtalker_dir": "/path/to/SadTalker",
+  "ffmpeg_dir": null,
+  "timeout_seconds": 1800
+}
