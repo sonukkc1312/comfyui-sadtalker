@@ -1,4 +1,4 @@
-# ComfyUI SadTalker — Isolated Custom Node
+# ComfyUI SadTalker by <https://Sadtalker.ai>
 
 Generate talking-head videos inside ComfyUI from a portrait image and a speech audio clip.
 SadTalker runs in a **completely separate Python 3.10 virtualenv**, so it never conflicts with ComfyUI's own environment.
